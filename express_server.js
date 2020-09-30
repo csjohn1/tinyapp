@@ -13,8 +13,20 @@ function genShortURL() {
 }
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  
+};
+
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
 };
 
 app.get("/", (req, res) => {
@@ -84,6 +96,23 @@ app.post("/login", (req, res) => {
 
 app.post("/logout", (req, res) => {
   res.clearCookie("username");
+  res.redirect("/urls/");
+});
+
+app.get("/register", (req, res) => {
+  
+  res.render("urls_reg");
+});
+
+app.post("/register", (req, res) => {
+  let newID = genShortURL();
+  users[newID] = {
+    id: newID, 
+    email: req.body.email,
+    password: req.body.password
+  };
+  res.cookie("user_id", newID);
+  console.log(users);
   res.redirect("/urls/");
 });
 
