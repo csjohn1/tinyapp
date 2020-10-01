@@ -16,15 +16,15 @@ const urlDatabase = {
   
 };
 
-const users = { 
+const users = {
   "userRandomID": {
-    id: "userRandomID", 
-    email: "user@example.com", 
+    id: "userRandomID",
+    email: "user@example.com",
     password: "purple-monkey-dinosaur"
   },
- "user2RandomID": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
     password: "dishwasher-funk"
   }
 };
@@ -46,10 +46,10 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = { 
+  const templateVars = {
     urls: urlDatabase,
     user: users[req.cookies["user_id"]]
-   };
+  };
   res.render("urls_index", templateVars);
 });
 
@@ -77,8 +77,8 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { 
-    shortURL: req.params.shortURL, 
+  const templateVars = {
+    shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
     user: users[req.cookies["user_id"]]
   };
@@ -91,43 +91,62 @@ app.post("/urls/:shortURL", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  res.cookie("username", req.body.username);
-  res.redirect("/urls/");
+  if (req.body.email === "" || req.body.password === "") {
+    return res.status(403).send("Please enter a valid email and/or password");
+  }
+
+  for (let user in users) {
+    if (users[user].email === req.body.email) {
+      if (users[user].password === req.body.password) {
+        res.cookie("user_id", users[user].id);
+        return res.redirect("/urls/");
+      }
+    } else {
+      return res.status(403).send("Email and/or password not found");
+    }
+  }
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
+  res.clearCookie("user_id");
   res.redirect("/urls/");
 });
 
 app.get("/register", (req, res) => {
-  
-  res.render("urls_reg");
+  const templateVars = {
+    user: users[req.cookies["user_id"]]
+  };
+  res.render("urls_reg", templateVars);
 });
 
 app.post("/register", (req, res) => {
+  console.log(users);
   let newID = genShortURL();
   if (req.body.email === "" || req.body.password === "") {
     return res.status(400).send("Please enter a valid email and/or password");
   } else {
-  for (let user in users) {
-    if (users[user].email === req.body.email) {
-      return res.status(400).send("Email is already in use");
+    for (let user in users) {
+      if (users[user].email === req.body.email) {
+        return res.status(400).send("Email is already in use");
+      }
     }
+
+    users[newID] = {
+      id: newID,
+      email: req.body.email,
+      password: req.body.password
+    };
+    console.log(users[newID].email);
+    res.cookie("user_id", newID);
+    console.log(users);
+    res.redirect("/urls/");
   }
-  users[newID] = {
-    id: newID, 
-    email: req.body.email,
-    password: req.body.password
-  };
-  res.cookie("user_id", newID);
-  res.redirect("/urls/");
-}
 });
 
 app.get("/login", (req, res) => {
-
-
-  res.render("urls_login");
+  const templateVars = {
+    user: users[req.cookies["user_id"]]
+  };
+  res.render("urls_login", templateVars);
 });
 

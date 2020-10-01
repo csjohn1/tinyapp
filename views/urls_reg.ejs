@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  
+  <%- include('partials/_header') %>
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
   <title>URL - TinyApp Example</title>
@@ -10,7 +10,7 @@
 <body>
   <form method="POST" action="/register/">
     <div class="form-group">
-      <h3 for="RegistrationTitle">Register</H3>
+      <h3 for="RegistrationTitle">Create Account</H3>
       <label for="exampleInputEmail1">Email address</label>
       <input type="email" name="email" class="form-control" aria-describedby="emailHelp" placeholder="Enter email">
     </div>
