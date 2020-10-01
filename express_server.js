@@ -107,19 +107,11 @@ app.get("/register", (req, res) => {
 
 app.post("/register", (req, res) => {
   let newID = genShortURL();
-  // console.log(users[req.cookies["user_id"]].email);
-  // console.log(req.body.email);
-  // console.log(req.body.password);
-  // console.log(users);
-
   if (req.body.email === "" || req.body.password === "") {
     return res.status(400).send("Please enter a valid email and/or password");
   } else {
-  
   for (let user in users) {
-  // console.log(users[user].email);
     if (users[user].email === req.body.email) {
-
       return res.status(400).send("Email is already in use");
     }
   }
@@ -129,9 +121,13 @@ app.post("/register", (req, res) => {
     password: req.body.password
   };
   res.cookie("user_id", newID);
-  console.log(users);
   res.redirect("/urls/");
 }
-  
+});
+
+app.get("/login", (req, res) => {
+
+
+  res.render("urls_login");
 });
 
