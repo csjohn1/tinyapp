@@ -56,10 +56,14 @@ app.get("/urls", (req, res) => {
 app.post("/urls", (req, res) => {
   let shortURL = genShortURL();
   urlDatabase[shortURL] = req.body.longURL;
+  //console.log(urlDatabase);
   res.redirect(`/urls/${shortURL}`);
 });
 
 app.get("/urls/new", (req, res) => {
+  if (!req.cookies["user_id"]) {
+    return res.redirect("/login");
+  };
   const templateVars = {
     user: users[req.cookies["user_id"]]
   };
