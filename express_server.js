@@ -3,6 +3,7 @@ const app = express();
 const PORT = 8080;
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
+const bcrypt = require('bcrypt');
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs");
@@ -17,16 +18,16 @@ const urlDatabase = {
 };
 
 const users = {
-  "userRandomID": {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "1"
-  },
-  "user2RandomID": {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk"
-  }
+  // "userRandomID": {
+  //   id: "userRandomID",
+  //   email: "user@example.com",
+  //   password: "1"
+  // },
+  // "user2RandomID": {
+  //   id: "user2RandomID",
+  //   email: "user2@example.com",
+  //   password: "dishwasher-funk"
+  // }
 };
 
 app.get("/", (req, res) => {
@@ -111,16 +112,16 @@ app.post("/login", (req, res) => {
   if (req.body.email === "" || req.body.password === "") {
     return res.status(403).send("Please enter a valid email and/or password");
   }
-
+ 
   for (let user in users) {
     if (users[user].email === req.body.email) {
-      if (users[user].password === req.body.password) {
+      if (bcrypt.compareSync(req.body.password, users[user].password)) { 
+      // if (users[user].password === req.body.password) {
         res.cookie("user_id", users[user].id);
         return res.redirect("/urls/");
       }
-    } else {
       return res.status(403).send("Email and/or password not found");
-    }
+    } 
   }
 });
 
@@ -146,11 +147,15 @@ app.post("/register", (req, res) => {
         return res.status(400).send("Email is already in use");
       }
     }
+    const password = req.body.password;
+    const hashedPassword = bcrypt.hashSync(password, 10);
     users[newID] = {
       id: newID,
       email: req.body.email,
-      password: req.body.password
+      //password: req.body.password
+      password: hashedPassword
     };
+    console.log(users);
     res.cookie("user_id", newID);
     res.redirect("/urls/");
   }
