@@ -1,5 +1,5 @@
 <header>
-  <nav class="navbar navbar-expand-md navbar-dark bg-success">
+  <nav class="navbar navbar-expand-md navbar-dark bg-success justify-content-between">
     <a class="navbar-brand" href="/urls">TinyApp</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -10,11 +10,11 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
         
         <% if (user) { %>
-          <div>Logged in as <%= user.email %></div>
-          <form method="POST" name="user_id" action="/logout"><button type="submit" class="btn btn-outline-light">Logout</button></form>
+          <a class="nav-item nav-link">Logged in as <%= user.email %></a>
+          <form class="form-inline my-2 my-lg-0" method="POST" name="user_id" action="/logout"><button type="submit" class="btn btn-outline-light">Logout</button></form>
           <% } else { %>
-          <form method="GET" name="user_id" action="/login"><button type="submit" class="btn btn-outline-light">Login</button></form>
-          <form method="GET" name="user_id" action="/register"><button type="submit" class="btn btn-outline-light">Register</button></form>
+          <form class="form-inline mr-sm-2" method="GET" name="user_id" action="/login"><button type="submit" class="btn btn-outline-light">Login</button></form>
+          <form class="form-inline my-2 my-sm-0" method="GET" name="user_id" action="/register"><button type="submit" class="btn btn-outline-light">Register</button></form>
 
           <% } %>
       </div>
