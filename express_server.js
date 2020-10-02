@@ -2,27 +2,25 @@ const express = require("express");
 const app = express();
 const PORT = 8080;
 const bodyParser = require("body-parser");
-// const cookieParser = require("cookie-parser");
 const cookieSession = require("cookie-session");
 const bcrypt = require('bcrypt');
+const { getUserByEmail, checkEmail } = require("./helpers");
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs");
-app.use(cookieSession( {
+app.use(cookieSession({
   name: 'session',
   keys: ['bc195cdc919cf3edc1fac2d25f768236', 'cd44ea8345b0d0b91bade4f25f768298'],
   // Cookie Options
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }));
 
-
-
 function genShortURL() {
   return Math.random().toString(36).substr(2, 6);
 }
 
 const urlDatabase = {
-  
+
 };
 
 const users = {
@@ -55,7 +53,6 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-
   let userURLs = {};
   for (const url in urlDatabase) {
     if (req.session.user_id === urlDatabase[url].userID) {
@@ -63,7 +60,6 @@ app.get("/urls", (req, res) => {
     }
   }
   const templateVars = {urls: userURLs, user: users[req.session.user_id]};
-  console.log(templateVars.urls);
   templateVars.user ? res.render("urls_index", templateVars) : res.redirect("/login");
 });
 
@@ -120,16 +116,15 @@ app.post("/login", (req, res) => {
   if (req.body.email === "" || req.body.password === "") {
     return res.status(403).send("Please enter a valid email and/or password");
   }
- 
-  for (let user in users) {
-    if (users[user].email === req.body.email) {
-      if (bcrypt.compareSync(req.body.password, users[user].password)) { 
-      // if (users[user].password === req.body.password) {
+  if (checkEmail(req.body.email, users)) {
+    for (let user in users) {
+      if (bcrypt.compareSync(req.body.password, users[user].password)) {
         req.session.user_id = users[user].id;
         return res.redirect("/urls/");
       }
-      return res.status(403).send("Email and/or password not found");
-    } 
+    }
+  } else {
+    return res.status(403).send("Email and/or password not found");
   }
 });
 
@@ -149,24 +144,20 @@ app.post("/register", (req, res) => {
   let newID = genShortURL();
   if (req.body.email === "" || req.body.password === "") {
     return res.status(400).send("Please enter a valid email and/or password");
-  } else {
-    for (let user in users) {
-      if (users[user].email === req.body.email) {
-        return res.status(400).send("Email is already in use");
-      }
-    }
-    const password = req.body.password;
-    const hashedPassword = bcrypt.hashSync(password, 10);
-    users[newID] = {
-      id: newID,
-      email: req.body.email,
-      //password: req.body.password
-      password: hashedPassword
-    };
-    console.log(users);
-    req.session.user_id = newID;
-    res.redirect("/urls/");
   }
+  if (checkEmail(req.body.email, users)) {
+    return res.status(400).send("Email is already in use");
+  }
+  const password = req.body.password;
+  const hashedPassword = bcrypt.hashSync(password, 10);
+  users[newID] = {
+    id: newID,
+    email: req.body.email,
+    //password: req.body.password
+    password: hashedPassword
+  };
+  req.session.user_id = newID;
+  res.redirect("/urls/");
 });
 
 app.get("/login", (req, res) => {
