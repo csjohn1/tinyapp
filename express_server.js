@@ -66,7 +66,6 @@ app.get("/urls", (req, res) => {
 app.post("/urls", (req, res) => {
   let shortURL = genShortURL();
   urlDatabase[shortURL] =  {longURL: req.body.longURL, userID: req.session.user_id};
-
   res.redirect(`/urls/${shortURL}`);
 });
 
@@ -97,16 +96,27 @@ app.get("/u/:shortURL", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
     shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL]["longURL"],
     user: users[req.session.user_id]
   };
-  res.render("urls_show", templateVars);
+  
+  if (!templateVars.user) {
+    return res.redirect("/login");
+  } else {
+  
+    const templateVars = {
+      shortURL: req.params.shortURL,
+      longURL: urlDatabase[req.params.shortURL]["longURL"],
+      user: users[req.session.user_id]
+    };
+    //res.render("urls_show", templateVars);
+    templateVars.user ? res.render("urls_show", templateVars) : res.redirect("/login");
+  }
 });
 
 app.post("/urls/:shortURL", (req, res) => {
   if (req.session.user_id === urlDatabase[req.params.shortURL].userID) {
     urlDatabase[req.params.shortURL].longURL = req.body.longURL;
-    res.redirect(`/urls/${req.params.shortURL}`);
+    res.redirect("/urls/");
   } else {
     res.redirect("/login");
   }
@@ -123,9 +133,9 @@ app.post("/login", (req, res) => {
         return res.redirect("/urls/");
       }
     }
-  } else {
-    return res.status(403).send("Email and/or password not found");
   }
+  return res.status(403).send("Email and/or password not found");
+  
 });
 
 app.post("/logout", (req, res) => {
@@ -153,7 +163,6 @@ app.post("/register", (req, res) => {
   users[newID] = {
     id: newID,
     email: req.body.email,
-    //password: req.body.password
     password: hashedPassword
   };
   req.session.user_id = newID;
